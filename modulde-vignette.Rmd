@@ -12,21 +12,48 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+## Goals of the project
 
 [1] provides background on the statistical method/topic/data visualization procedure that you have chosen to explore and [2] takes a user through one or more examples of the application of the approach with a real dataset. 
+create and call at least 2 functions with documentation!!
+custom r package
+one or more datasets
 
 
-```{r cars}
-summary(cars)
+## Introduction
+
+Principal component analysis is a dimentionality-reduction method, that is used with multi-dimensional data sets, by transforming the variables into smaller components, without eliminating much of the data. Even though some of the accuracy may be compromised, PCA is great for simplifying very complicated and large data sets and exploring overall patterns as well as preparing the dataset for data visualization.
+
+The process of PCA can be broken down to 5 steps
+
+### Step 1: Standardization
+
+Whenever working with different data types (e.g., different measurements, units, scales, percentages...etc.) it is crucial to standerdize the variables before conducting any further analysis, so any variances are measured on the same scale.
+
+Statistically speaking this means z-scoring all the variables
+
+```{r z score image, echo=FALSE, out.width="##%"}
+knitr::include_graphics("images/Screenshot 2022-04-20 at 12.38.46 PM.png")
+
 ```
 
-## Including Plots
+When working in R we can use the scale() function to standardize our variabes
 
-You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r z score example, echo=TRUE}
+
+#here we should show and example from our data set
+
+d$Zvariable <- score(d$variable)
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+### Step 2: Covariance Matrix Computation
+
+
+
+```{r covariance, echo=TRUE}
+
+```
+
+
