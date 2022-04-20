@@ -1,0 +1,32 @@
+---
+title: "Prinicipal Components analysis (PCA)"
+author: "Ajna Kertesz, Maddie Pickett"
+date: '2022-04-20'
+output: 
+ html_document:
+   toc:true
+   toc_float:true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+[1] provides background on the statistical method/topic/data visualization procedure that you have chosen to explore and [2] takes a user through one or more examples of the application of the approach with a real dataset. 
+
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
