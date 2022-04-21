@@ -18,6 +18,7 @@ knitr::opts_chunk$set(echo = TRUE)
 create and call at least 2 functions with documentation!!
 custom r package
 one or more datasets
+WHY IS THIS USEFUL? WHAT KIND OF DATA IS IT USED WITH?
 
 
 ## Introduction
