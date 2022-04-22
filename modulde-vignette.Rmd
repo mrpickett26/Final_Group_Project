@@ -7,9 +7,16 @@ output:
    toc:true
    toc_float:true
 ---
-
+## Loading in the data sets. For this project, we have selected the Wisconsin Breast Cancer Dataset. It provides features of Fine Needle Aspirates of breast cancer samples from patients from the University of Wisconsin Medical Center and has been commonly used in Machine Learning.
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+f<-"https://raw.githubusercontent.com/mrpickett26/Final_Group_Project/main/WBCDSdata.csv"
+d<- read_csv(f, col_names=TRUE) ## load in the Wisconsin breast cancer dataset
+
+#https://www.kaggle.com/code/shravank/predicting-breast-cancer-using-pca-lda-in-r/report
+
+#Use^ as a reference
 ```
 
 ## Goals of the project
@@ -22,22 +29,22 @@ one or more datasets
 
 ## Introduction
 
-Principal component analysis is a dimentionality-reduction method, that is used with multi-dimensional data sets, by transforming the variables into smaller components, without eliminating much of the data. Even though some of the accuracy may be compromised, PCA is great for simplifying very complicated and large data sets and exploring overall patterns as well as preparing the dataset for data visualization.
+Principal component analysis is a dimensionality-reduction method, that is used with multi-dimensional data sets, by transforming the variables into smaller components, without eliminating much of the data. Even though some of the accuracy may be compromised, PCA is great for simplifying very complicated and large data sets and exploring overall patterns as well as preparing the dataset for data visualization.
 
 The process of PCA can be broken down to 5 steps
 
 ### Step 1: Standardizing all variables
 
-Whenever working with different data types (e.g., different measurements, units, scales, percentages...etc.) it is crucial to standerdize the variables before conducting any further analysis, so any variances are measured on the same scale.
+Whenever working with different data types (e.g., different measurements, units, scales, percentages...etc.) it is crucial to standardize the variables before conducting any further analysis, so any variances are measured on the same scale.
 
-Statistically speaking this means z-scoring all the variables
+Statistically speaking this means z-scoring all the variables.
 
 ```{r z score image, echo=FALSE, out.width="##%"}
 knitr::include_graphics("images/Screenshot 2022-04-20 at 12.38.46 PM.png")
 
 ```
 
-When working in R we can use the scale() function to standardize our variabes
+When working in R we can use the scale() function to standardize our variables.
 
 
 ```{r z score example, echo=TRUE}
@@ -72,7 +79,7 @@ cov(d)
 
 Eigenvectors and eigenvalues are linear transformations of a nonzero vector that allow us to determine the *principal components* of the data.
 
-Therefore, this new way of organizing the data will allow us to reduce complexity (dimentionality) without loosing much information.
+Therefore, this new way of organizing the data will allow us to reduce complexity (dimensionality) without loosing much information.
 
 Computationally, this looks like this
 
@@ -103,7 +110,7 @@ Once we calculate the eigenvectors and eigenvalues, we can organize the prinicip
 
 ### Step 5: Recasting the data along the principal components axes
 
-By using the selected fature vector we can finally reorient the data using the axes from the principal components.
+By using the selected feature vector we can finally reorient the data using the axes from the principal components.
 
 ```{r recast extract, echo=TRUE}
 
