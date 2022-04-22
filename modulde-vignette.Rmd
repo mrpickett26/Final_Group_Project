@@ -25,6 +25,7 @@ d<- read_csv(f, col_names=TRUE) ## load in the Wisconsin breast cancer dataset
 create and call at least 2 functions with documentation!!
 custom r package
 one or more datasets
+WHY IS THIS USEFUL? WHAT KIND OF DATA IS IT USED WITH?
 
 
 ## Introduction
