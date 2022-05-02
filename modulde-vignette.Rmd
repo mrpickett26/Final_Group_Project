@@ -11,8 +11,73 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(dplyr)
+library(corrplot)
 f<-"https://raw.githubusercontent.com/mrpickett26/Final_Group_Project/main/WBCDSdata.csv"
-d<- read_csv(f, col_names=TRUE) ## load in the Wisconsin breast cancer dataset
+wdbc<- read_csv(f, col_names=TRUE) ## load in the Wisconsin breast cancer dataset
+summary(wdbc) #give us some summary stats on each variable, help us better understand the data we are working with 
+
+#The data set has tumors classified as benign and malignant, it is useful to go ahead and break down the dataset into those two subgroups
+
+wdbc.data <- as.matrix(wdbc[,c(3:32)])
+row.names(wdbc.data) <- wdbc$id
+diagnosis <- as.numeric(wdbc$diagnosis == "M") #Creates a new diagnosis vector
+outcome<- wdbc$diagnosis
+table(outcome) #It is helpful to know what is benign and what is malignant
+
+round(colMeans(wdbc.data),2) #It is also helpful to know the mean of the columns. This finds the means of each variable in the matrix. 
+
+# Also helpful to know the standard deviations of each variable in building the PCA model
+SD_var <- function(x){
+    round(sd(x), 2)
+}
+apply(wdbc.data, 2, SD_var)
+
+corMatrix <- wdbc[,c(3:32)]
+
+# Rename the columns in the dataset
+cNames <- c("rad_m","txt_m","per_m",
+                 "are_m","smt_m","cmp_m","con_m",
+                 "ccp_m","sym_m","frd_m",
+                 "rad_se","txt_se","per_se","are_se","smt_se",
+                 "cmp_se","con_se","ccp_se","sym_se",
+                 "frd_se","rad_w","txt_w","per_w",
+                 "are_w","smt_w","cmp_w","con_w",
+                 "ccp_w","sym_w","frd_w")
+
+colnames(corMatrix) <- cNames
+
+#This function creates a correlation matrix. A correlation matrix is a table that demonstrates which variables have a linear relationship between them. 
+M <- round(cor(corMatrix), 2)
+
+#Allows for visualization of the correlation matrix in a correlation plot. 
+corrplot(M, diag = FALSE, method="color", order="FPC", tl.srt = 90)
+
+#This plot shows us that there are many variables that are  correlated to one another 
+
+#Using PCA in this case is helpful because it can help us to better exemplify any patterns in the data. If we can select the variables that explain a majority of the covariance, we can significantly reduce the complexity of the model and better represent and understand the meaningful parts of the dataset. 
+
+## BEGIN PCA
+#Step 1: We need to know if we need to scale the dataset, or bring the numeric variables in the matrix to the same scale. This helps us determine if there is more of a need for a correlation or covariance matrix in our calculations. 
+
+#Using Covariance for PCA: The covariance matrix is a p × p symmetric matrix (where p is the number of dimensions) that has as entries the covariances associated with all possible pairs of the initial variables.
+
+wdbc.pcov <- princomp(wdbc.data, scores = TRUE)
+summary(wdbc.pcov) #Build the covariance matrix
+
+cex.before <- par("cex")
+par(cex = 0.7)
+biplot(wdbc.pcov) #Create a biplot of the covariance
+
+#After creating this biplot, we can see that area_worst and area_mean have much larger covariances than the other variables included. This is due to a scale issue and therefore indicates to us that we need to scale those variables for future PCA analysis.
+
+par(cex = cex.before)
+par(mfrow = c(1, 2)) #Set up a grid for PCA analysis
+pr.cvar <- wdbc.pcov$sdev ^ 2 #Calculate variability of each variable
+pve_cov <- pr.cvar/sum(pr.cvar) #Calculate the variance as explained by each principle component
+
+
+
 
 #https://www.kaggle.com/code/shravank/predicting-breast-cancer-using-pca-lda-in-r/report
 
