@@ -76,8 +76,66 @@ par(mfrow = c(1, 2)) #Set up a grid for PCA analysis
 pr.cvar <- wdbc.pcov$sdev ^ 2 #Calculate variability of each variable
 pve_cov <- pr.cvar/sum(pr.cvar) #Calculate the variance as explained by each principle component
 
+# We now need to calculate the eigen values and percent variance of each variable or "component" 
+round(pr.cvar, 2) #Eigen Values
+round(pve_cov, 2) # Percent Variance
+
+#We can now use these metrics to calculate the cumulative percentages. Cumulative percentage is another way of expressing frequency distribution. It calculates the percentage of the cumulative frequency within each interval, much as relative frequency distribution calculates the percentage of frequency.The main advantage of cumulative percentage over cumulative frequency as a measure of frequency distribution is that it provides an easier way to compare different sets of data.Cumulative percentage is calculated by dividing the cumulative frequency by the total number of observations (n), then multiplying it by 100 (the last value will always be equal to 100%).
+round(cumsum(pve_cov), 2) #Cumulative percentage
+
+#It is useful in PCA to create a scree plot of covariance and cumulative proportion of variance explained. In multivariate statistics, a scree plot is a line plot of the eigenvalues of factors or principal components in an analysis. The scree plot is used to determine the number of factors to retain in an exploratory factor analysis (FA) or principal components to keep in a principal component analysis (PCA).
+
+# Plot variance explained for each principal component
+plot(pve_cov, xlab = "Principal Component", 
+     ylab = "Proportion of Variance Explained", 
+     ylim = c(0, 1), type = "b")
 
 
+# Plot cumulative proportion of variance explained
+plot(cumsum(pve_cov), xlab = "Principal Component", 
+     ylab = "Cumulative Proportion of Variance Explained", 
+     ylim = c(0, 1), type = "b")
+
+# In the scree plots the first two or three PCs have capture most of the information. A scree plot shows how much variation each PC captures from the data. The y axis represents the  eigenvalues, which are the amount of variation. A scree plot is used to select which principal components to keep. An ideal curve should start as steep, then bends at an “elbow”  and finally flatten out. Our covariance matrix does not show this trend, and therefore we will move to a correlation matrix to see if the PC selection outcome improves. 
+
+#CORRELATION MATRIX
+#use the prcomp() function to calculate the eigenvectors
+wdbc.pr <- prcomp(wdbc.data, scale = TRUE, center = TRUE)
+summary(wdbc.pr)
+
+#Visualize using a Scree Plot
+
+# Set up 1 x 2 plotting grid
+par(mfrow = c(1, 2))
+
+# Calculate variability of each component
+pr.var <- wdbc.pr$sdev ^ 2
+
+# Assign names to the columns to be consistent with princomp.
+# This is done for reporting purposes.
+names(pr.var) <- names(pr.cvar)
+
+# Variance explained by each principal component: pve
+pve <- pr.var/sum(pr.var)
+
+# Assign names to the columns as it is not done by default.
+# This is done to be consistent with princomp.
+names(pve) <- names(pve_cov)
+
+round(pr.var, 2) #Eigen values 
+round(pve, 2) #Percent variance explained
+round(cumsum(pve), 2) # Cummulative percent explained
+
+plot(pve, xlab = "Principal Component", 
+     ylab = "Proportion of Variance Explained", 
+     ylim = c(0, 1), type = "b")
+
+# Plot cumulative proportion of variance explained
+plot(cumsum(pve), xlab = "Principal Component", 
+     ylab = "Cumulative Proportion of Variance Explained", 
+     ylim = c(0, 1), type = "b")
+
+#Majority of the variation is explained by the first six PC’s and the eigen values associated with the first 6 PC’s are greater than 1. This is the selection criteria we will use for the rest of the PCA.
 
 #https://www.kaggle.com/code/shravank/predicting-breast-cancer-using-pca-lda-in-r/report
 
