@@ -137,6 +137,7 @@ plot(cumsum(pve), xlab = "Principal Component",
 
 #Majority of the variation is explained by the first six PC’s and the eigen values associated with the first 6 PC’s are greater than 1. This is the selection criteria we will use for the rest of the PCA.
 
+
 #https://www.kaggle.com/code/shravank/predicting-breast-cancer-using-pca-lda-in-r/report
 
 #Use^ as a reference
