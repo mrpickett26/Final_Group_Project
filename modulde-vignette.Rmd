@@ -221,6 +221,7 @@ e<-eigen(d)
 
 e$values
 e$vectors
+z
 
 ```
 
