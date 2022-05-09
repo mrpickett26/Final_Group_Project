@@ -7,8 +7,11 @@ output:
    toc:true
    toc_float:true
 ---
-## Loading in the data sets. For this project, we have selected the Wisconsin Breast Cancer Dataset. It provides features of Fine Needle Aspirates of breast cancer samples from patients from the University of Wisconsin Medical Center and has been commonly used in Machine Learning.
-```{r setup, include=FALSE}
+## Loading in the data sets 
+
+For this project, we have selected the Wisconsin Breast Cancer Dataset. It provides features of Fine Needle Aspirates of breast cancer samples from patients from the University of Wisconsin Medical Center and has been commonly used in Machine Learning.
+
+```{r setup }
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(dplyr)
@@ -56,6 +59,13 @@ corrplot(M, diag = FALSE, method="color", order="FPC", tl.srt = 90)
 #This plot shows us that there are many variables that are  correlated to one another 
 
 #Using PCA in this case is helpful because it can help us to better exemplify any patterns in the data. If we can select the variables that explain a majority of the covariance, we can significantly reduce the complexity of the model and better represent and understand the meaningful parts of the dataset. 
+```
+
+
+
+```{r example, echo=TRUE}
+
+##I think we can delete this, since I transferred all this info into the step by step breakdown, but please double check that I substituted the right columns -Ajna
 
 ## BEGIN PCA
 #Step 1: We need to know if we need to scale the dataset, or bring the numeric variables in the matrix to the same scale. This helps us determine if there is more of a need for a correlation or covariance matrix in our calculations. 
@@ -142,9 +152,10 @@ plot(cumsum(pve), xlab = "Principal Component",
 #Use^ as a reference
 ```
 
-## Goals of the project
+## Goals of the project (probably should delete after finalizaing)
 
-[1] provides background on the statistical method/topic/data visualization procedure that you have chosen to explore and [2] takes a user through one or more examples of the application of the approach with a real dataset. 
+[1] provides background on the statistical method/topic/data visualization procedure that you have chosen to explore and 
+[2] takes a user through one or more examples of the application of the approach with a real dataset. 
 create and call at least 2 functions with documentation!!
 custom r package
 one or more datasets
@@ -159,7 +170,7 @@ The process of PCA can be broken down to 5 steps
 
 ### Step 1: Standardizing all variables
 
-Whenever working with different data types (e.g., different measurements, units, scales, percentages...etc.) it is crucial to standardize the variables before conducting any further analysis, so any variances are measured on the same scale.
+Whenever working with different data types (e.g., different measurements, units, scales, percentages...etc.) it is crucial to standardize the variables before conducting any further analysis, so any variances are measured on the same scale. 
 
 Statistically speaking this means z-scoring all the variables.
 
@@ -170,18 +181,17 @@ knitr::include_graphics("images/Screenshot 2022-04-20 at 12.38.46 PM.png")
 
 When working in R we can use the scale() function to standardize our variables.
 
-
 ```{r z score example, echo=TRUE}
 
 #here we should show and example from our data set
 
-d$Zvariable <- score(d$variable)
+wdbc.data$Zvariable <- scale(wdbc.data$variable)
 
 ```
 
 ### Step 2: Creating a covariance Matrix
 
-Next, we need to understand how each variables is different from the mean and see of there are any associations. To do this, we will need to create a covariance matrix, which is a symmetric matrix that includes all the variables (covariates) and the initial variables. 
+Next, we need to understand how each variables is different from the mean and see of there are any associations. To do this, we will need to create a covariance matrix, which is a p x p symmetric matrix (where p is the number of dimensions) that includes all the variables (covariates) and the initial variables. 
 
 
 Statistically it looks something like this. 
@@ -191,11 +201,23 @@ knitr::include_graphics("images/Screenshot 2022-04-20 at 12.59.42 PM.png")
 
 ```
 
-When working in R, we can use the cov() function to create the covariate matrix
+We can create this covarience matrix by following these steps
+
+```{r cov by hand, echo=TRUE}
+
+wdbc.pcov <- princomp(wdbc.data, scores = TRUE)
+summary(wdbc.pcov) #Build the covariance matrix
+
+cex.before <- par("cex")
+par(cex = 0.7)
+biplot(wdbc.pcov) #Create a biplot of the covariance
+```
+
+When working in R, we can also use the cov() function to create the covariate matrix
 
 ```{r covariance, echo=TRUE}
 
-cov(d)
+cov(wdbc.data)
 
 ```
 
@@ -212,11 +234,30 @@ knitr::include_graphics("images/eigen.png")
 
 ```
 
-To do this in R, we can use the eigen() function
+After creating this biplot, we can see that area_worst and area_mean have much larger covariances than the other variables included. This is due to a scale issue and therefore indicates to us that we need to scale those variables for future PCA analysis.Let's calculare the eigenvectors and eigenvalues in the following steps.
+
+```{r eigen by hand, echo=TRUE}
+
+par(cex = cex.before)
+par(mfrow = c(1, 2)) #Set up a grid for PCA analysis
+pr.cvar <- wdbc.pcov$sdev ^ 2 #Calculate variability of each variable
+pve_cov <- pr.cvar/sum(pr.cvar) #Calculate the variance as explained by each principle component
+
+# We now need to calculate the eigen values and percent variance of each variable or "component" 
+round(pr.cvar, 2) #Eigen Values
+round(pve_cov, 2) # Percent Variance
+
+#use the prcomp() function to calculate the eigenvectors
+wdbc.pr <- prcomp(wdbc.data, scale = TRUE, center = TRUE)
+summary(wdbc.pr)
+
+```
+
+To do this in R, we can also just use the eigen() function
 
 ```{r eigen, echo=TRUE}
 
-e<-eigen(d)
+e<-eigen(wdbc.data)
 
 e$values
 e$vectors
@@ -225,19 +266,67 @@ e$vectors
 
 ### Step 4: Selecting the feature vector - Feture vector extraction
 
-Once we calculate the eigenvectors and eigenvalues, we can organize the prinicipal factors in the order of significance and choose our best (most significant) matrix. 
+We can now use these metrics to calculate the cumulative percentages. Cumulative percentage is another way of expressing frequency distribution. It calculates the percentage of the cumulative frequency within each interval, much as relative frequency distribution calculates the percentage of frequency.The main advantage of cumulative percentage over cumulative frequency as a measure of frequency distribution is that it provides an easier way to compare different sets of data.Cumulative percentage is calculated by dividing the cumulative frequency by the total number of observations (n), then multiplying it by 100 (the last value will always be equal to 100%).
+
+It is useful in PCA to create a scree plot of covariance and cumulative proportion of variance explained. In multivariate statistics, a scree plot is a line plot of the eigenvalues of factors or principal components in an analysis. The scree plot is used to determine the number of factors to retain in an exploratory factor analysis (FA) or principal components to keep in a principal component analysis (PCA).
 
 ```{r feture extract, echo=TRUE}
 
+round(cumsum(pve_cov), 2) #Cumulative percentage
+
+# Plot variance explained for each principal component
+plot(pve_cov, xlab = "Principal Component", 
+     ylab = "Proportion of Variance Explained", 
+     ylim = c(0, 1), type = "b")
+
+
+# Plot cumulative proportion of variance explained
+plot(cumsum(pve_cov), xlab = "Principal Component", 
+     ylab = "Cumulative Proportion of Variance Explained", 
+     ylim = c(0, 1), type = "b")
 
 ```
+
+In the scree plots the first two or three PCs have capture most of the information. A scree plot shows how much variation each PC captures from the data. The y axis represents the  eigenvalues, which are the amount of variation. A scree plot is used to select which principal components to keep. An ideal curve should start as steep, then bends at an “elbow”  and finally flatten out. Our covariance matrix does not show this trend, and therefore we will move to a correlation matrix to see if the PC selection outcome improves.
 
 ### Step 5: Recasting the data along the principal components axes
 
 By using the selected feature vector we can finally reorient the data using the axes from the principal components.
 
 ```{r recast extract, echo=TRUE}
+#Visualize using a Scree Plot
 
+# Set up 1 x 2 plotting grid
+par(mfrow = c(1, 2))
+
+# Calculate variability of each component
+pr.var <- wdbc.pr$sdev ^ 2
+
+# Assign names to the columns to be consistent with princomp.
+# This is done for reporting purposes.
+names(pr.var) <- names(pr.cvar)
+
+# Variance explained by each principal component: pve
+pve <- pr.var/sum(pr.var)
+
+# Assign names to the columns as it is not done by default.
+# This is done to be consistent with princomp.
+names(pve) <- names(pve_cov)
+
+round(pr.var, 2) #Eigen values 
+round(pve, 2) #Percent variance explained
+round(cumsum(pve), 2) # Cummulative percent explained
+
+plot(pve, xlab = "Principal Component", 
+     ylab = "Proportion of Variance Explained", 
+     ylim = c(0, 1), type = "b")
+
+# Plot cumulative proportion of variance explained
+plot(cumsum(pve), xlab = "Principal Component", 
+     ylab = "Cumulative Proportion of Variance Explained", 
+     ylim = c(0, 1), type = "b")
+
+#Majority of the variation is explained by the first six PC’s and the eigen values associated with the first 6 PC’s are greater than 1. This is the selection criteria we will use for the rest of the PCA.
 
 ```
 
@@ -247,11 +336,11 @@ When working in R, we can skip a lot of these steps by running the prcomp() func
 
 ```{r PCA extract, echo=TRUE}
 
-d.pca<-prcomp(d[,c(x,y,z)], center=TRUE, scale. =TRUE)
+d.pca<-prcomp(wdbc.data[,c(x,y,z)], center=TRUE, scale. =TRUE)
 ```
 
 
-# Visualizing PCA
+## Visualizing PCA
 
 Let's install ggbiplot to explore some ways in which we can visualize PCAs.
 
