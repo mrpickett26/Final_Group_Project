@@ -9,7 +9,7 @@ output:
 ---
 ## Loading in the data sets 
 
-For this project, we have selected the Wisconsin Breast Cancer Dataset. It provides features of Fine Needle Aspirates of breast cancer samples from patients from the University of Wisconsin Medical Center and has been commonly used in Machine Learning.
+For this project, we have selected the Wisconsin Breast Cancer Dataset. It provides features of Fine Needle Aspirates of breast cancer samples from patients from the University of Wisconsin Medical Center and has been commonly used in Machine Learning. Need another dataset
 
 ```{r setup }
 knitr::opts_chunk$set(echo = TRUE)
