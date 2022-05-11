@@ -1,32 +1,84 @@
 ---
-title: "Prinicipal Components analysis (PCA)"
+title: "Prinicipal Components Analysis (PCA)"
 author: "Ajna Kertesz, Maddie Pickett"
-date: '2022-04-20'
+date: '2022-05-10'
 output: 
  html_document:
-   toc:true
-   toc_float:true
+   toc: true
+   toc_float: true
+theme: lumen
 ---
-## Loading in the data sets 
 
-For this project, we have selected the Wisconsin Breast Cancer Dataset. It provides features of Fine Needle Aspirates of breast cancer samples from patients from the University of Wisconsin Medical Center and has been commonly used in Machine Learning. Need another dataset
+## Goals of the project (probably should delete after finalizaing)
 
-```{r setup }
+[1] provides background on the statistical method/topic/data visualization procedure that you have chosen to explore  --> DONE
+[2] takes a user through one or more examples of the application of the approach with a real dataset. --> DONE
+
+create and call at least 2 functions with documentation!! --> we have one for sd, but need another
+custom r package --> NOT DONE
+one or more datasets--> DONE
+
+WHY IS THIS USEFUL? WHAT KIND OF DATA IS IT USED WITH? --> NOT DONE
+
+
+## Introduction
+
+Principal component analysis is a dimensionality-reduction method, that is used with multi-dimensional data sets, by transforming the variables into smaller components, without eliminating much of the data. Even though some of the accuracy may be compromised, PCA is great for simplifying very complicated and large data sets and exploring overall patterns as well as preparing the dataset for data visualization.
+
+Generally PCA in R 
+
+The process of PCA can be broken down to 5 steps
+
+## Step 1: Standardizing all variables
+
+Whenever working with different data types (e.g., different measurements, units, scales, percentages...etc.) it is crucial to standardize the variables before conducting any further analysis, so any variances are measured on the same scale. 
+
+Statistically speaking this means z-scoring all the variables.
+
+When working in R we can use the scale() function to standardize our variables. In the prcomp() functions we will take care of this by scale=TRUE and the princomp() function will take care of this when cor=TRUE. The princomp() and prcomp() represent two different methods of doing PCA. The two methods are 
+   1. Spectral decomposition which explores the covariances / correlations between variables (prcomp()) &
+   2. Singular value decomposition which looks at the covariances / correlations between individuals or individual samples as a whole (princomp())
+   
+In this overview we will cover two data sets for PCA analysis. For one we will use 1. spectral decomposition and for the other we will use 2. single value decomposition. 
+
+1) The dataset we will use for the singular value decomposition is data from a weather station in Berlin, Germany. Each component corresponds to a particular variable related to the single weather station. This analysis is adapted from (https://www.geo.fu-berlin.de/en/v/soga/Geodata-analysis/Principal-Component-Analysis/PCA-an-example/Data-preparation/index.html). 
+
+2) The dataset we will use for Single Value Decomposition is the Wisconsin Breast Cancer dataset. It provides features of Fine Needle Aspirates of breast cancer samples from patients from the University of Wisconsin Medical Center and has been commonly used in Machine Learning. The code used for this PCA analysis was adapted from (https://www.kaggle.com/code/shravank/predicting-breast-cancer-using-pca-lda-in-r/report).
+
+We can go ahead and load in the needed packages and datasets for this analysis. One package you might not be familiar with is the caret package, which has the findcorrelation() function. This function allows us to remove highly correlated predictors. 
+
+```{r setup, echo=TRUE, warning=FALSE, message=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
 library(tidyverse)
 library(dplyr)
+library(caret)
 library(corrplot)
+library(readr)
+
 f<-"https://raw.githubusercontent.com/mrpickett26/Final_Group_Project/main/WBCDSdata.csv"
 wdbc<- read_csv(f, col_names=TRUE) ## load in the Wisconsin breast cancer dataset
-summary(wdbc) #give us some summary stats on each variable, help us better understand the data we are working with 
+wbg <- read.csv2("https://userpage.fu-berlin.de/soga/300/30100_data_sets/DWD.csv", stringsAsFactors = FALSE)
 
-#The data set has tumors classified as benign and malignant, it is useful to go ahead and break down the dataset into those two subgroups
+```
 
+Now we should make the data into a tidier format where we can use it more easily, we also want to clean it up-- in the weather dataset we can exclude some features before we even begin analysis to make it a little more straightforward. In this case we are looking at how the variables interact with each other regardless of ID number, so we can drop any ID variables.
+
+```{r tidy BG, echo=TRUE}
+wbg<- wbg%>%select(LAT, LON, ALTITUDE, RECORD.LENGTH, MEAN.ANNUAL.AIR.TEMP, MEAN.MONTHLY.MAX.TEMP, MEAN.MONTHLY.MIN.TEMP, MEAN.ANNUAL.RAINFALL, MEAN.ANNUAL.SUNSHINE, MEAN.ANNUAL.WIND.SPEED,MEAN.RANGE.AIR.TEMP, MEAN.CLOUD.COVER, MAX.RAINFALL) 
+
+str(wbg)
+
+wbg<-na.omit(wbg)
+```
+
+The WBC data set has tumors classified as benign and malignant, it is useful to go ahead and break down the dataset into those two subgroups [Benign and Malignant] and subset them by response variable. 
+
+```{r tidy BC, echo=TRUE}
 wdbc.data <- as.matrix(wdbc[,c(3:32)])
 row.names(wdbc.data) <- wdbc$id
-diagnosis <- as.numeric(wdbc$diagnosis == "M") #Creates a new diagnosis vector
+diagnosis <- as.numeric(wdbc$diagnosis == "Malignant") #Creates a new diagnosis vector
 outcome<- wdbc$diagnosis
-table(outcome) #It is helpful to know what is benign and what is malignant
 
 round(colMeans(wdbc.data),2) #It is also helpful to know the mean of the columns. This finds the means of each variable in the matrix. 
 
@@ -38,184 +90,18 @@ apply(wdbc.data, 2, SD_var)
 
 corMatrix <- wdbc[,c(3:32)]
 
-# Rename the columns in the dataset
-cNames <- c("rad_m","txt_m","per_m",
-                 "are_m","smt_m","cmp_m","con_m",
-                 "ccp_m","sym_m","frd_m",
-                 "rad_se","txt_se","per_se","are_se","smt_se",
-                 "cmp_se","con_se","ccp_se","sym_se",
-                 "frd_se","rad_w","txt_w","per_w",
-                 "are_w","smt_w","cmp_w","con_w",
-                 "ccp_w","sym_w","frd_w")
-
-colnames(corMatrix) <- cNames
-
 #This function creates a correlation matrix. A correlation matrix is a table that demonstrates which variables have a linear relationship between them. 
 M <- round(cor(corMatrix), 2)
 
 #Allows for visualization of the correlation matrix in a correlation plot. 
 corrplot(M, diag = FALSE, method="color", order="FPC", tl.srt = 90)
 
-#This plot shows us that there are many variables that are  correlated to one another 
-
-#Using PCA in this case is helpful because it can help us to better exemplify any patterns in the data. If we can select the variables that explain a majority of the covariance, we can significantly reduce the complexity of the model and better represent and understand the meaningful parts of the dataset. 
+#This plot shows us that there are many variables that are correlated to one another 
 ```
 
+## Step 2: Creating a covariance Matrix
 
-
-```{r example, echo=TRUE}
-
-##I think we can delete this, since I transferred all this info into the step by step breakdown, but please double check that I substituted the right columns -Ajna
-
-## BEGIN PCA
-#Step 1: We need to know if we need to scale the dataset, or bring the numeric variables in the matrix to the same scale. This helps us determine if there is more of a need for a correlation or covariance matrix in our calculations. 
-
-#Using Covariance for PCA: The covariance matrix is a p × p symmetric matrix (where p is the number of dimensions) that has as entries the covariances associated with all possible pairs of the initial variables.
-
-wdbc.pcov <- princomp(wdbc.data, scores = TRUE)
-summary(wdbc.pcov) #Build the covariance matrix
-
-cex.before <- par("cex")
-par(cex = 0.7)
-biplot(wdbc.pcov) #Create a biplot of the covariance
-
-#After creating this biplot, we can see that area_worst and area_mean have much larger covariances than the other variables included. This is due to a scale issue and therefore indicates to us that we need to scale those variables for future PCA analysis.
-
-par(cex = cex.before)
-par(mfrow = c(1, 2)) #Set up a grid for PCA analysis
-pr.cvar <- wdbc.pcov$sdev ^ 2 #Calculate variability of each variable
-pve_cov <- pr.cvar/sum(pr.cvar) #Calculate the variance as explained by each principle component
-
-# We now need to calculate the eigen values and percent variance of each variable or "component" 
-round(pr.cvar, 2) #Eigen Values
-round(pve_cov, 2) # Percent Variance
-
-#We can now use these metrics to calculate the cumulative percentages. Cumulative percentage is another way of expressing frequency distribution. It calculates the percentage of the cumulative frequency within each interval, much as relative frequency distribution calculates the percentage of frequency.The main advantage of cumulative percentage over cumulative frequency as a measure of frequency distribution is that it provides an easier way to compare different sets of data.Cumulative percentage is calculated by dividing the cumulative frequency by the total number of observations (n), then multiplying it by 100 (the last value will always be equal to 100%).
-round(cumsum(pve_cov), 2) #Cumulative percentage
-
-#It is useful in PCA to create a scree plot of covariance and cumulative proportion of variance explained. In multivariate statistics, a scree plot is a line plot of the eigenvalues of factors or principal components in an analysis. The scree plot is used to determine the number of factors to retain in an exploratory factor analysis (FA) or principal components to keep in a principal component analysis (PCA).
-
-# Plot variance explained for each principal component
-plot(pve_cov, xlab = "Principal Component", 
-     ylab = "Proportion of Variance Explained", 
-     ylim = c(0, 1), type = "b")
-
-
-# Plot cumulative proportion of variance explained
-plot(cumsum(pve_cov), xlab = "Principal Component", 
-     ylab = "Cumulative Proportion of Variance Explained", 
-     ylim = c(0, 1), type = "b")
-
-# In the scree plots the first two or three PCs have capture most of the information. A scree plot shows how much variation each PC captures from the data. The y axis represents the  eigenvalues, which are the amount of variation. A scree plot is used to select which principal components to keep. An ideal curve should start as steep, then bends at an “elbow”  and finally flatten out. Our covariance matrix does not show this trend, and therefore we will move to a correlation matrix to see if the PC selection outcome improves. 
-
-#CORRELATION MATRIX
-#use the prcomp() function to calculate the eigenvectors
-wdbc.pr <- prcomp(wdbc.data, scale = TRUE, center = TRUE)
-summary(wdbc.pr)
-
-#Visualize using a Scree Plot
-
-# Set up 1 x 2 plotting grid
-par(mfrow = c(1, 2))
-
-# Calculate variability of each component
-pr.var <- wdbc.pr$sdev ^ 2
-
-# Assign names to the columns to be consistent with princomp.
-# This is done for reporting purposes.
-names(pr.var) <- names(pr.cvar)
-
-# Variance explained by each principal component: pve
-pve <- pr.var/sum(pr.var)
-
-# Assign names to the columns as it is not done by default.
-# This is done to be consistent with princomp.
-names(pve) <- names(pve_cov)
-
-round(pr.var, 2) #Eigen values 
-round(pve, 2) #Percent variance explained
-round(cumsum(pve), 2) # Cummulative percent explained
-
-plot(pve, xlab = "Principal Component", 
-     ylab = "Proportion of Variance Explained", 
-     ylim = c(0, 1), type = "b")
-
-# Plot cumulative proportion of variance explained
-plot(cumsum(pve), xlab = "Principal Component", 
-     ylab = "Cumulative Proportion of Variance Explained", 
-     ylim = c(0, 1), type = "b")
-
-#Majority of the variation is explained by the first six PC’s and the eigen values associated with the first 6 PC’s are greater than 1. This is the selection criteria we will use for the rest of the PCA.
-
-
-#https://www.kaggle.com/code/shravank/predicting-breast-cancer-using-pca-lda-in-r/report
-
-#Use^ as a reference
-```
-
-## Goals of the project (probably should delete after finalizaing)
-
-[1] provides background on the statistical method/topic/data visualization procedure that you have chosen to explore and 
-[2] takes a user through one or more examples of the application of the approach with a real dataset. 
-create and call at least 2 functions with documentation!!
-custom r package
-one or more datasets
-WHY IS THIS USEFUL? WHAT KIND OF DATA IS IT USED WITH?
-
-
-## Introduction
-
-Principal component analysis is a dimensionality-reduction method, that is used with multi-dimensional data sets, by transforming the variables into smaller components, without eliminating much of the data. Even though some of the accuracy may be compromised, PCA is great for simplifying very complicated and large data sets and exploring overall patterns as well as preparing the dataset for data visualization.
-
-Generally PCA in R 
-
-The process of PCA can be broken down to 5 steps
-
-### Step 1: Standardizing all variables
-
-Whenever working with different data types (e.g., different measurements, units, scales, percentages...etc.) it is crucial to standardize the variables before conducting any further analysis, so any variances are measured on the same scale. 
-
-Statistically speaking this means z-scoring all the variables.
-
-When working in R we can use the scale() function to standardize our variables. In the prcomp() functions we will take care of this by scale=TRUE and the princomp() function will take care of this when cor=TRUE. The princomp() and prcomp() represent two different methods of doing PCA. The two methods are 
-   Spectral decomposition which explores the covariances / correlations between variables (prcomp()) &
-   Singular value decomposition which looks at the covariances / correlations between individuals or individual samples as a whole (princomp())
-In this overview we will cover two data sets for PCA analysis. For one we will use 1. spectral decomposition and for the other we will use 2. single value decomposition. 
-
-1) The dataset we will use for the singular value decomposition is data from a weather station in Berlin, Germany. Each component corresponds to a particular variable related to the single weather station. This analysis is adapted from (https://www.geo.fu-berlin.de/en/v/soga/Geodata-analysis/Principal-Component-Analysis/PCA-an-example/Data-preparation/index.html). 
-
-2) The dataset we will use for Single Value Decomposition is the Wisconsin Breast Cancer dataset. It provides features of Fine Needle Aspirates of breast cancer samples from patients from the University of Wisconsin Medical Center and has been commonly used in Machine Learning. The code used for this PCA analysis was adapted from (https://www.kaggle.com/code/shravank/predicting-breast-cancer-using-pca-lda-in-r/report).
-
-We can go ahead and load in the needed packages and datasets for this analysis. One package you might not be familiar with is the caret package, which has the findcorrelation() function. This function allows us to remove highly correlated predictors. 
-```{r setup }
-knitr::opts_chunk$set(echo = TRUE)
-library(tidyverse)
-library(dplyr)
-library(caret)
-library(corrplot)
-library(readr)
-f<-"https://raw.githubusercontent.com/mrpickett26/Final_Group_Project/main/WBCDSdata.csv"
-wdbc<- read_csv(f, col_names=TRUE) ## load in the Wisconsin breast cancer dataset
-wbg <- read.csv2("https://userpage.fu-berlin.de/soga/300/30100_data_sets/DWD.csv", stringsAsFactors = FALSE)
-```
-Want to make the data into a tidier format where we can use it more easily, also want to clean it up-- in the weather dataset we can exclude some features before we even begin analysis to make it a little more straightforward. In this case we are looking at how the variables interact with eachother regardless of id number, so we can drop any id variables.
-```{r tidy BG}
-wbg<- wbg%>%select(LAT, LON, ALTITUDE, RECORD.LENGTH, PERIOD, MEAN.ANNUAL.AIR.TEMP, MEAN.MONTHLY.MAX.TEMP, MEAN.MONTHLY.MIN.TEMP, MEAN.ANNUAL.RAINFALL, MEAN.ANNUAL.SUNSHINE, MEAN.ANNUAL.WIND.SPEED,MEAN.RANGE.AIR.TEMP, MEAN.CLOUD.COVER, MAX.RAINFALL)
-
-str(wbg)
-```
-The WBC data set has tumors classified as benign and malignant, it is useful to go ahead and break down the dataset into those two subgroups [Benign and Malignant] and subset them by response variable. 
-```{r tidy BC}
-wdbc.data <- as.matrix(wdbc[,c(3:32)])
-row.names(wdbc.data) <- wdbc$id
-diagnosis <- as.numeric(wdbc$diagnosis == "Malignant") #Creates a new diagnosis vector
-outcome<- wdbc$diagnosis
-```
-
-### Step 2: Creating a covariance Matrix
-
-Next, we need to understand how each variables is different from the mean and see of there are any associations. To do this, we will need to create a covariance matrix, which is a p x p symmetric matrix (where p is the number of dimensions) that includes all the variables (covariates) and the initial variables. 
-
+Next, we need to understand how each variable is different from the mean and see if there are any associations. To do this, we will need to create a covariance matrix, which is a p x p symmetric matrix (where p is the number of dimensions) that includes all the variables (covariates) and the initial variables. 
 
 Statistically it looks something like this. 
 
@@ -224,42 +110,78 @@ knitr::include_graphics("images/Screenshot 2022-04-20 at 12.59.42 PM.png")
 
 ```
 
-We can create this covariance matrix by following these steps
+We can create this covariance matrix by following these steps:
 
-```{r cov by hand, echo=TRUE}
+1) Spectral decomposition
 
+```{r wbg prcomp, echo=TRUE}
+
+wbg.pcov <- prcomp(wbg, cor=FALSE, scores=TRUE) #error with infinate or missing values
+summary(wbg.pcov) #Build the covariance matrix
+
+cex.before <- par("cex")
+par(cex = 0.7)
+biplot(wbg.pcov) #Create a biplot of the covariance
+
+str(wbg)
+```
+
+2) Singular value decomposition
+
+```{r wdbc princomp, echo=TRUE}
 wdbc.pcov <- princomp(wdbc.data, scores = TRUE)
 summary(wdbc.pcov) #Build the covariance matrix
 
 cex.before <- par("cex")
 par(cex = 0.7)
 biplot(wdbc.pcov) #Create a biplot of the covariance
+
+
+
 ```
 
 When working in R, we can also use the cov() function to create the covariate matrix
 
 ```{r covariance, echo=TRUE}
 
+cov(wbg)
+
 cov(wdbc.data)
 
 ```
 
-### Step 3: Computing the eigenvectors and eigenvalues
+## Step 3: Computing the eigenvectors and eigenvalues
 
 Eigenvectors and eigenvalues are linear transformations of a nonzero vector that allow us to determine the *principal components* of the data.
 
 Therefore, this new way of organizing the data will allow us to reduce complexity (dimensionality) without loosing much information.
 
-Computationally, this looks like this
+Computationally, this looks like this:
 
 ```{r eigen› image, echo=FALSE, out.width="##%"}
 knitr::include_graphics("images/eigen.png")
 
 ```
 
-After creating this biplot, we can see that area_worst and area_mean have much larger covariances than the other variables included. This is due to a scale issue and therefore indicates to us that we need to scale those variables for future PCA analysis.Let's calculare the eigenvectors and eigenvalues in the following steps.
+After creating the biplots in the previos step, we can see that area_worst and area_mean have much larger covariances than the other variables included. This is due to a scale issue and therefore indicates to us that we need to scale those variables for future PCA analysis. Let's calculate the eigenvectors and eigenvalues in the following steps.
 
 ```{r eigen by hand, echo=TRUE}
+
+
+par(cex = cex.before)
+par(mfrow = c(1, 2)) #Set up a grid for PCA analysis
+pr.cvar <- wbg.pcov$sdev ^ 2 #Calculate variability of each variable
+pve_cov_wbg <- pr.cvar/sum(pr.cvar) #Calculate the variance as explained by each principle component
+
+# We now need to calculate the eigen values and percent variance of each variable or "component" 
+round(pr.cvar, 2) #Eigen Values
+round(pve_cov_wbg, 2) # Percent Variance
+
+#use the prcomp() function to calculate the eigenvectors
+wbg.pr <- prcomp(wbg, scale = TRUE, center = TRUE)
+summary(wbg.pr)
+
+######wdbc
 
 par(cex = cex.before)
 par(mfrow = c(1, 2)) #Set up a grid for PCA analysis
@@ -276,24 +198,30 @@ summary(wdbc.pr)
 
 ```
 
-To do this in R, we can also just use the eigen() function
 
-```{r eigen, echo=TRUE}
+## Step 4: Selecting the feature vector - Feture vector extraction
 
-e<-eigen(wdbc.data)
-
-e$values
-e$vectors
-
-```
-
-### Step 4: Selecting the feature vector - Feture vector extraction
-
-We can now use these metrics to calculate the cumulative percentages. Cumulative percentage is another way of expressing frequency distribution. It calculates the percentage of the cumulative frequency within each interval, much as relative frequency distribution calculates the percentage of frequency.The main advantage of cumulative percentage over cumulative frequency as a measure of frequency distribution is that it provides an easier way to compare different sets of data.Cumulative percentage is calculated by dividing the cumulative frequency by the total number of observations (n), then multiplying it by 100 (the last value will always be equal to 100%).
+We can now use these metrics to calculate the cumulative percentages. Cumulative percentage is another way of expressing frequency distribution. It calculates the percentage of the cumulative frequency within each interval, much as relative frequency distribution calculates the percentage of frequency. The main advantage of cumulative percentage over cumulative frequency as a measure of frequency distribution is that it provides an easier way to compare different sets of data.Cumulative percentage is calculated by dividing the cumulative frequency by the total number of observations (n), then multiplying it by 100 (the last value will always be equal to 100%).
 
 It is useful in PCA to create a scree plot of covariance and cumulative proportion of variance explained. In multivariate statistics, a scree plot is a line plot of the eigenvalues of factors or principal components in an analysis. The scree plot is used to determine the number of factors to retain in an exploratory factor analysis (FA) or principal components to keep in a principal component analysis (PCA).
 
 ```{r feture extract, echo=TRUE}
+
+
+round(cumsum(pve_cov_wbg), 2) #Cumulative percentage
+
+# Plot variance explained for each principal component
+plot(pve_cov_wbg, xlab = "Principal Component", 
+     ylab = "Proportion of Variance Explained", 
+     ylim = c(0, 1), type = "b")
+
+
+# Plot cumulative proportion of variance explained
+plot(cumsum(pve_cov_wbg), xlab = "Principal Component", 
+     ylab = "Cumulative Proportion of Variance Explained", 
+     ylim = c(0, 1), type = "b")
+
+#######
 
 round(cumsum(pve_cov), 2) #Cumulative percentage
 
@@ -312,7 +240,7 @@ plot(cumsum(pve_cov), xlab = "Principal Component",
 
 In the scree plots the first two or three PCs have capture most of the information. A scree plot shows how much variation each PC captures from the data. The y axis represents the  eigenvalues, which are the amount of variation. A scree plot is used to select which principal components to keep. An ideal curve should start as steep, then bends at an “elbow”  and finally flatten out. Our covariance matrix does not show this trend, and therefore we will move to a correlation matrix to see if the PC selection outcome improves.
 
-### Step 5: Recasting the data along the principal components axes
+## Step 5: Recasting the data along the principal components axes
 
 By using the selected feature vector we can finally reorient the data using the axes from the principal components.
 
@@ -359,7 +287,12 @@ When working in R, we can skip a lot of these steps by running the prcomp() func
 
 ```{r PCA extract, echo=TRUE}
 
-d.pca<-prcomp(wdbc.data[,c(x,y,z)], center=TRUE, scale. =TRUE)
+wbg.pca<-prcomp(wbg, center=TRUE, scale =TRUE)
+
+wdbc.pca<-princomp(wdbc.data, center=TRUE, scale =TRUE)
+
+wbg.pca
+wdbc.pca
 ```
 
 
@@ -367,15 +300,21 @@ d.pca<-prcomp(wdbc.data[,c(x,y,z)], center=TRUE, scale. =TRUE)
 
 Let's install ggbiplot to explore some ways in which we can visualize PCAs.
 
-```{r PCA visual, echo=TRUE}
+```{r PCA visual, echo=TRUE, message=FALSE, echo=FALSE}
 
 library(devtools)
+library(ggfortify)
+
 install_github("vqv/ggbiplot")
 
-d.groups<-c(rep("something", "x"), rep("other", "y"), rep("else", "z"))
+require(ggbiplot)
 
-ggbiplot(d.pca, label=rownames(d), ellipse=TRUE, circle=TRUE, groups=d.groups)
+ggbiplot(wbg.pca)
 
+ggbiplot(wdbc.pca)
+
+autoplot(wbg.pca)
+autoplot(wdbc.pca)
 
 ```
 
