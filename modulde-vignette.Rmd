@@ -14,7 +14,7 @@ theme: lumen
 [1] provides background on the statistical method/topic/data visualization procedure that you have chosen to explore  --> DONE
 [2] takes a user through one or more examples of the application of the approach with a real dataset. --> DONE
 
-create and call at least 2 functions with documentation!! --> we have one for sd, but need another
+create and call at least 2 functions with documentation!! --> DONE
 custom r package --> NOT DONE
 one or more datasets--> DONE
 
