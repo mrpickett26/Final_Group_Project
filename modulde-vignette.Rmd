@@ -18,7 +18,7 @@ create and call at least 2 functions with documentation!! --> DONE
 custom r package --> NOT DONE
 one or more datasets--> DONE
 
-WHY IS THIS USEFUL? WHAT KIND OF DATA IS IT USED WITH? --> NOT DONE
+WHY IS THIS USEFUL? WHAT KIND OF DATA IS IT USED WITH? -->  DONE
 
 
 ## Introduction
