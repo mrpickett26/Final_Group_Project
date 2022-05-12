@@ -60,20 +60,23 @@ library(caret)
 library(corrplot)
 library(readr)
 library(devtools)
+library(roxygen2)
 
 f<-"https://raw.githubusercontent.com/mrpickett26/Final_Group_Project/main/WBCDSdata.csv"
 wdbc<- read_csv(f, col_names=TRUE) ## load in the Wisconsin breast cancer dataset
-wbg <- read.csv2("https://userpage.fu-berlin.de/soga/300/30100_data_sets/DWD.csv", stringsAsFactors = FALSE)
+wbg <- read.csv2("https://raw.githubusercontent.com/mrpickett26/Final_Group_Project/main/wbg.csv", stringsAsFactors = FALSE)
 
 ```
 
 ```{r scale, echo=TRUE, warning=FALSE, message=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-roxygen2::roxygenise()
+
 #' @title Scale Variables for PCA
-#' 
+#' @description This function allow us to scale the variable within a dataframe or matrix for PCA.
 #' @param x numeric variables used to determine principal components for subsequent PCA.
 #' @return The variable minus the mean of the variables, divided by standard deviation of variables.
+#' @keywords scale, variables, normalize
+#' @export
 #' @examples
 #' scale_func(wbg)
 scale_func<-function(x)
@@ -124,6 +127,15 @@ outcome<- wdbc$diagnosis
 round(colMeans(wdbc.data),2) #It is also helpful to know the mean of the columns. This finds the means of each variable in the matrix. 
 
 # Also helpful to know the standard deviations of each variable in building the PCA model
+
+#' @title Standard deviation for variables in PCA
+#' @description This function allow us to find the standard deviations variable within columns of a dataframe or matrix for PCA.
+#' @param x numeric variables used to determine principal components for subsequent PCA.
+#' @return the standard deviation of the variables, rounded to 2 significant digits.
+#' @keywords round, standard deviation, std dev, std
+#' @export
+#' @examples
+#' apply(wdbc.data, 2, SD_var)
 SD_var <- function(x){
     round(sd(x), 2)
 }
