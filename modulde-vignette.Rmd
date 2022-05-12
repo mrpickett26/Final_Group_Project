@@ -8,14 +8,6 @@ output:
    toc_float: true
 theme: lumen
 ---
-```{r package }
-usethis::create_package("/Users/ajnafannikertesz/Desktop/Data Analysis Course/Final_Group_Project")
-
-getwd()
-
-```
-
-
 
 ## Goals of the project (probably should delete after finalizaing)
 
