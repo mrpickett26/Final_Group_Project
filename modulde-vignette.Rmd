@@ -72,15 +72,6 @@ outcome<- wdbc$diagnosis
 
 round(colMeans(wdbc.data),2) #It is also helpful to know the mean of the columns. This finds the means of each variable in the matrix. 
 
-#' @title Standard deviation for variables in PCA
-#' @description This function allow us to find the standard deviations variable within columns of a dataframe or matrix for PCA.
-#' @param x numeric variables used to determine principal components for subsequent PCA.
-#' @return the standard deviation of the variables, rounded to 2 significant digits.
-#' @keywords round, standard deviation, std dev, std
-#' @export
-#' @examples
-#' apply(wdbc.data, 2, SD_var)
-# Also helpful to know the standard deviations of each variable in building the PCA model
 SD_var <- function(x){
     round(sd(x), 2)
 }
@@ -109,14 +100,6 @@ When working in R we can use the scale() function to standardize our variables, 
 ```{r scale, echo=TRUE, warning=FALSE, message=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-#' @title Scale Variables for PCA
-#' @description This function allow us to scale the variable within a dataframe or matrix for PCA.
-#' @param x numeric variables used to determine principal components for subsequent PCA.
-#' @return The variable minus the mean of the variables, divided by standard deviation of variables.
-#' @keywords scale, variables, normalize
-#' @export
-#' @examples
-#' scale_func(wbg)
 scale_func<-function(x)
    {(x-mean(x))/sd(x)
 }

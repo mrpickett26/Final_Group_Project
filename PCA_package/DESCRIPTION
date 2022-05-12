@@ -4,8 +4,7 @@ Title: This is a summary of what PCA is and how we can ran and visualize PCA in 
 Version: 0.1.0
 Author: Ajna F. Kertesz, Maddie Pickett
 Maintainer: akertesz@utexas.edu
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Description: Principal component analysis is a dimensionality-reduction method, that is used with multi-dimensional data sets, by transforming the variables into smaller components, without eliminating much of the data. Even though some of the accuracy may be compromised, PCA is great for simplifying very complicated and large data sets and exploring overall patterns as well as preparing the dataset for data visualization.
 License: MIT
 Encoding: UTF-8
 LazyData: true
