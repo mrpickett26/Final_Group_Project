@@ -9,48 +9,36 @@ output:
 theme: lumen
 ---
 
-## Goals of the project (probably should delete after finalizaing)
-
-[1] provides background on the statistical method/topic/data visualization procedure that you have chosen to explore  --> DONE
-[2] takes a user through one or more examples of the application of the approach with a real dataset. --> DONE
-
-create and call at least 2 functions with documentation!! --> DONE
-custom r package --> NOT DONE
-one or more datasets--> DONE
-
-WHY IS THIS USEFUL? WHAT KIND OF DATA IS IT USED WITH? --> NOT DONE
-
-
-## Introduction
+# Introduction
 
 Principal component analysis is a dimensionality-reduction method, that is used with multi-dimensional data sets, by transforming the variables into smaller components, without eliminating much of the data. Even though some of the accuracy may be compromised, PCA is great for simplifying very complicated and large data sets and exploring overall patterns as well as preparing the dataset for data visualization.
 
-##You may be wondering why is PCA useful?
+## Why is PCA useful?
+
 The most important use of PCA is to represent a multivariate data table as smaller set of variables (summary indices) in order to observe trends, jumps, clusters and outliers. PCA is a very flexible tool and allows analysis of datasets that may contain, for example, multicollinearity, missing values, categorical data, and imprecise measurements. The goal of PCA is to extract the important information from the data and to express this information as a set of summary indices called principal components. (https://www.sartorius.com/en/knowledge/science-snippets/what-is-principal-component-analysis-pca-and-how-it-is-used-507186)
 
-When to use PCA: 
--PCA technique is particularly useful in processing data where multi-colinearity exists between the features/variables.
--PCA can be used when the dimensions of the input features are high (e.g. a lot of variables).
--PCA can be also used for denoising and data compression.
+### When to use PCA
+
+- PCA technique is particularly useful in processing data where multi-colinearity exists between the features/variables.
+- PCA can be used when the dimensions of the input features are high (e.g. a lot of variables).
+- PCA can be also used for denoising and data compression.
 (https://towardsdatascience.com/pca-clearly-explained-how-when-why-to-use-it-and-feature-importance-a-guide-in-python-7c274582c37e)
 
-Qualities of datasets that make it good for PCA: 
--PCA works with datasets with NUMERIC variables, it is very hard to do distance calculations and standardize/normalize mixed datasets or categorical variables. There are better methods for doing what PCA does for mixed/categorical datasets.
--PCA works best on data set having 3 or higher dimensions. Because, with higher dimensions, it becomes increasingly difficult for us to make interpretations from the resultant cloud of data.
+### Qualities of datasets that make it good for PCA
+
+- PCA works with datasets with NUMERIC variables, it is very hard to do distance calculations and standardize/normalize mixed datasets or categorical variables. There are better methods for doing what PCA does for mixed/categorical datasets.
+- PCA works best on data set having 3 or higher dimensions. Because, with higher dimensions, it becomes increasingly difficult for us to make interpretations from the resultant cloud of data.
 (https://www.analyticsvidhya.com/blog/2016/03/pca-practical-guide-principal-component-analysis-python/)
 
 
-Generally PCA in R 
+# Generally PCA in R 
 
 The process of PCA can be broken down to 5 steps
 
-## Step 1: Standardizing all variables
+## Step 0: load and tidy the datasets
 
-Whenever working with different data types (e.g., different measurements, units, scales, percentages...etc.) it is crucial to standardize the variables before conducting any further analysis, so any variances are measured on the same scale. The goal is to make the variables comparable. Generally variables are scaled to have i) standard deviation one and ii) mean zero.
+Let's start by loading in the needed packages and datasets for this analysis. One package you might not be familiar with is the caret package, which has the findcorrelation() function. This function allows us to remove highly correlated predictors. 
 
-Statistically speaking this means z-scoring all the variables.
-
-When working in R we can use the scale() function to standardize our variables, but for a refresher on normalization of data, we have included a documented scale function below. 
 ```{r setup, echo=TRUE, warning=FALSE, message=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
@@ -66,42 +54,10 @@ wbg <- read.csv2("https://userpage.fu-berlin.de/soga/300/30100_data_sets/DWD.csv
 
 ```
 
-```{r scale, echo=TRUE, warning=FALSE, message=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-
-scale_func<-function(x)
-   {(x-mean(x))/sd(x)
-}
-
-#Now we can try it out using both the built in function and our function
-
-#Using our scale function
-wbg_funct_scale<-lapply(wbg[,sapply(wbg, is.numeric)], scale_func)
-
-#Using the built in R function
-wbg_scale_built_in<-scale(wbg, center = TRUE, scale = TRUE)
-
-```
-
-In the prcomp() functions we will take care of this by scale=TRUE and the princomp() function will take care of this when cor=TRUE. The princomp() and prcomp() represent two different methods of doing PCA. The two methods are 
-   1. Spectral decomposition which explores the covariances / correlations between variables (prcomp()) &
-   2. Singular value decomposition which looks at the covariances / correlations between individuals or individual samples as a whole (princomp())
-   
-In this overview we will cover two data sets for PCA analysis. For one we will use 1. spectral decomposition and for the other we will use 2. single value decomposition. 
-
-1) The dataset we will use for the singular value decomposition is data from a weather station in Berlin, Germany. Each component corresponds to a particular variable related to the single weather station. This analysis is adapted from (https://www.geo.fu-berlin.de/en/v/soga/Geodata-analysis/Principal-Component-Analysis/PCA-an-example/Data-preparation/index.html). 
-
-2) The dataset we will use for Single Value Decomposition is the Wisconsin Breast Cancer dataset. It provides features of Fine Needle Aspirates of breast cancer samples from patients from the University of Wisconsin Medical Center and has been commonly used in Machine Learning. The code used for this PCA analysis was adapted from (https://www.kaggle.com/code/shravank/predicting-breast-cancer-using-pca-lda-in-r/report).
-
-We can go ahead and load in the needed packages and datasets for this analysis. One package you might not be familiar with is the caret package, which has the findcorrelation() function. This function allows us to remove highly correlated predictors. 
-
-
 Now we should make the data into a tidier format where we can use it more easily, we also want to clean it up-- in the weather dataset we can exclude some features before we even begin analysis to make it a little more straightforward. In this case we are looking at how the variables interact with each other regardless of ID number, so we can drop any ID variables.
 
 ```{r tidy BG, echo=TRUE}
 wbg<- wbg%>%select(LAT, LON, ALTITUDE, RECORD.LENGTH, MEAN.ANNUAL.AIR.TEMP, MEAN.MONTHLY.MAX.TEMP, MEAN.MONTHLY.MIN.TEMP, MEAN.ANNUAL.RAINFALL, MEAN.ANNUAL.SUNSHINE, MEAN.ANNUAL.WIND.SPEED,MEAN.RANGE.AIR.TEMP, MEAN.CLOUD.COVER, MAX.RAINFALL) 
-
-str(wbg)
 
 wbg<-na.omit(wbg)
 ```
@@ -131,7 +87,46 @@ M <- round(cor(corMatrix), 2)
 corrplot(M, diag = FALSE, method="color", order="FPC", tl.srt = 90)
 
 #This plot shows us that there are many variables that are correlated to one another 
+
 ```
+
+## Step 1: Standardizing all variables
+
+Whenever working with different data types (e.g., different measurements, units, scales, percentages...etc.) it is crucial to standardize the variables before conducting any further analysis, so any variances are measured on the same scale. The goal is to make the variables comparable. Generally variables are scaled to have i) standard deviation one and ii) mean zero.
+
+Statistically speaking this means z-scoring all the variables.
+
+When working in R we can use the scale() function to standardize our variables, but for a refresher on normalization of data, we have included a documented scale function below. 
+
+```{r scale, echo=TRUE, warning=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+scale_func<-function(x)
+   {(x-mean(x))/sd(x)
+}
+
+#Now we can try it out using both the built in function and our function
+
+#Using our scale function
+wbg_funct_scale<-lapply(wbg[,sapply(wbg, is.numeric)], scale_func)
+wdbc_funct_scale<-lapply(wdbc.data[sapply(wdbc.data, is.numeric)], scale_func)
+
+
+#Using the built in R function
+wbg_scale_built_in<-scale(wbg, center = TRUE, scale = TRUE)
+wdbc_scale_built_in<-scale(wdbc.data, center = TRUE, scale = TRUE)
+```
+
+In the prcomp() functions we will take care of this by scale=TRUE and the princomp() function will take care of this when cor=TRUE. The princomp() and prcomp() represent two different methods of doing PCA. The two methods are 
+
+   1. Spectral decomposition which explores the covariances / correlations between variables (prcomp()) &
+   2. Singular value decomposition which looks at the covariances / correlations between individuals or individual samples as a whole (princomp())
+   
+In this overview we will cover two data sets for PCA analysis. For one we will use 1. spectral decomposition for the weather dataset and we will use 2. single value decomposition for the breast cancer dataset
+
+1) The dataset we will use for the singular value decomposition is data from a weather station in Berlin, Germany. Each component corresponds to a particular variable related to the single weather station. This analysis is adapted from (https://www.geo.fu-berlin.de/en/v/soga/Geodata-analysis/Principal-Component-Analysis/PCA-an-example/Data-preparation/index.html). 
+
+2) The dataset we will use for Single Value Decomposition is the Wisconsin Breast Cancer dataset. It provides features of Fine Needle Aspirates of breast cancer samples from patients from the University of Wisconsin Medical Center and has been commonly used in Machine Learning. The code used for this PCA analysis was adapted from (https://www.kaggle.com/code/shravank/predicting-breast-cancer-using-pca-lda-in-r/report).
 
 ## Step 2: Creating a covariance Matrix
 
@@ -157,7 +152,6 @@ cex.before <- par("cex")
 par(cex = 0.7)
 biplot(wbg.pcov) #Create a biplot of the covariance
 
-str(wbg)
 ```
 
 2) Singular value decomposition
@@ -203,7 +197,7 @@ par(mfrow = c(1, 2)) #Set up a grid for PCA analysis
 pr.cvar <- wbg.pcov$sdev ^ 2 #Calculate variability of each variable
 pve_cov_wbg <- pr.cvar/sum(pr.cvar) #Calculate the variance as explained by each principle component
 
-# We now need to calculate the eigen values and percent variance of each variable or "component" 
+#We now need to calculate the eigen values and percent variance of each variable or "component" 
 round(pr.cvar, 2) #Eigen Values
 round(pve_cov_wbg, 2) # Percent Variance
 
@@ -211,7 +205,7 @@ round(pve_cov_wbg, 2) # Percent Variance
 wbg.pr <- prcomp(wbg, scale = TRUE, center = TRUE)
 summary(wbg.pr)
 
-######wdbc
+######wdbc dataset
 
 par(cex = cex.before)
 par(mfrow = c(1, 2)) #Set up a grid for PCA analysis
@@ -229,13 +223,14 @@ summary(wdbc.pr)
 ```
 
 
-## Step 4: Selecting the feature vector - Feture vector extraction
+## Step 4: Feture vector extraction
 
-We can now use these metrics to calculate the cumulative percentages. Cumulative percentage is another way of expressing frequency distribution. It calculates the percentage of the cumulative frequency within each interval, much as relative frequency distribution calculates the percentage of frequency. The main advantage of cumulative percentage over cumulative frequency as a measure of frequency distribution is that it provides an easier way to compare different sets of data.Cumulative percentage is calculated by dividing the cumulative frequency by the total number of observations (n), then multiplying it by 100 (the last value will always be equal to 100%).
+We can now use these metrics to calculate the cumulative percentages. Cumulative percentage is another way of expressing frequency distribution. It calculates the percentage of the cumulative frequency within each interval, much as relative frequency distribution calculates the percentage of frequency. The main advantage of cumulative percentage over cumulative frequency as a measure of frequency distribution is that it provides an easier way to compare different sets of data. Cumulative percentage is calculated by dividing the cumulative frequency by the total number of observations (n), then multiplying it by 100 (the last value will always be equal to 100%).
 
 It is useful in PCA to create a scree plot of covariance and cumulative proportion of variance explained. In multivariate statistics, a scree plot is a line plot of the eigenvalues of factors or principal components in an analysis. The scree plot is used to determine the number of factors to retain in an exploratory factor analysis (FA) or principal components to keep in a principal component analysis (PCA). 
 
 We can begin this step by looking at the German dataset. 
+
 ```{r feature extract German dataset, echo=TRUE}
 
 round(cumsum(pve_cov_wbg), 2) #Cumulative percentage
@@ -251,7 +246,9 @@ plot(cumsum(pve_cov_wbg), xlab = "Principal Component",
      ylab = "Cumulative Proportion of Variance Explained", 
      ylim = c(0, 1), type = "b")
 ```
+
 Now the Wisconsin dataset. 
+
 ```{r feature extract Wisconsin dataset, echo=TRUE}
 round(cumsum(pve_cov), 2) #Cumulative percentage
 
@@ -307,18 +304,22 @@ plot(cumsum(pve), xlab = "Principal Component",
      ylim = c(0, 1), type = "b")
 
 ```
+
 A majority of the variation is explained by the first six PC’s and the eigen values associated with the first 6 PC’s are greater than 1. This is the selection criteria we will use for the rest of the WBC data PCA.
 
 Another way to determine the number of factors to use in PCA is through the preprocess() function in the caret package. This by default keeps the components that explain 95% of the variance but can be changed using the thresh or pcaComp parameter. 
+
 ```{r caret package extract, echo=TRUE}
 preProc <- preProcess(wbg,method="pca",thresh = 0.95) #Can substitutr in thresh with PCAcomp to change number of components you want to account for 
 predictPC <- predict(preProc, wbg)
 plot(predictPC[,3],predictPC[,4],col=blues9)
 
 ```
+
 This result can also be represented by the graph above where most of the points are clustered on the y-axis around 0. This indicated to us that the variables can probably be combined and retain most of the information found from both variables, separately. By changing out the variables in the caret package (what is included in the brackets), we can better understand what is happening/the relationship between the variables which assists in preprocessing for dimensionality reduction.
 
 Sub in different variables:
+
 ```{r caret package extract num2, echo=TRUE}
 preProc2 <- preProcess(wbg,method="pca",thresh = 0.95) #Can substitutr in thresh with PCAcomp to change number of components you want to account for 
 predictPC2 <- predict(preProc2, wbg)
@@ -326,7 +327,7 @@ plot(predictPC2[,4],predictPC2[,7],col=blues9)
 
 ```
 
-## PCA in less steps
+# PCA in less steps
 
 When working in R, we can skip a lot of these steps by running the prcomp() function and setting the arguments center and scale to be true. Then the summary() will give us the best model(s).
 
@@ -340,11 +341,11 @@ wdbc.pca
 ```
 
 
-## Visualizing PCA
+# Visualizing PCA
 
-Let's install ggbiplot to explore some ways in which we can visualize PCAs.
+Let's install ggfortify to explore some ways in which we can visualize PCAs.
 
-```{r PCA visual, echo=TRUE, message=FALSE, echo=FALSE}
+```{r PCA visual, echo=TRUE, message=FALSE, warning=FALSE}
 
 library(devtools)
 library(ggfortify)
@@ -357,12 +358,25 @@ ggbiplot(wbg.pca)
 
 ggbiplot(wdbc.pca)
 
-autoplot(wbg.pca)
-autoplot(wdbc.pca)
+#let's make it more aestetic
+
+wbg_plot<- ggbiplot(wbg.pca, obs.scale = 1, var.scale = 1, ellipse = TRUE, circle = TRUE)+theme_minimal()
+
+wbg_plot+labs(title = "PCA of yield contributing parameters")
+       
+wdbc_plot<- ggbiplot(wdbc.pca, obs.scale = 1, var.scale = 1, ellipse = TRUE, circle = TRUE)+theme_minimal()   
+
+wdbc_plot+labs(title = "PCA of yield contributing parameters")
+
+
 
 ```
-The FactoMineR package can do PCA for you, and the factoextra package is useful in extracting components of the PCA analysis done by the FactoMineR package.  
-```{r PCA builtin, echo=TRUE, message=FALSE, echo=FALSE}
+
+Another way to visualize PCA is by using the factoextra package
+
+The FactoMineR package can do PCA for you, and the factoextra package is useful in extracting components of the PCA analysis done by the FactoMineR package. Let's explore the functions from these packages with the WDBC dataset.
+
+```{r PCA builtin, message=FALSE, echo=FALSE, warning=FALSE}
 
 library(FactoMineR)
 library(factoextra)
