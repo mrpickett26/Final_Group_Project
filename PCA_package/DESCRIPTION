@@ -1,0 +1,11 @@
+Package: PCA
+Type: Package
+Title: This is a summary of what PCA is and how we can ran and visualize PCA in R 
+Version: 0.1.0
+Author: Ajna F. Kertesz, Maddie Pickett
+Maintainer: akertesz@utexas.edu
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+License: MIT
+Encoding: UTF-8
+LazyData: true
