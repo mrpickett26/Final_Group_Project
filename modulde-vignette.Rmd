@@ -25,6 +25,21 @@ WHY IS THIS USEFUL? WHAT KIND OF DATA IS IT USED WITH? --> NOT DONE
 
 Principal component analysis is a dimensionality-reduction method, that is used with multi-dimensional data sets, by transforming the variables into smaller components, without eliminating much of the data. Even though some of the accuracy may be compromised, PCA is great for simplifying very complicated and large data sets and exploring overall patterns as well as preparing the dataset for data visualization.
 
+##You may be wondering why is PCA useful?
+The most important use of PCA is to represent a multivariate data table as smaller set of variables (summary indices) in order to observe trends, jumps, clusters and outliers. PCA is a very flexible tool and allows analysis of datasets that may contain, for example, multicollinearity, missing values, categorical data, and imprecise measurements. The goal of PCA is to extract the important information from the data and to express this information as a set of summary indices called principal components. (https://www.sartorius.com/en/knowledge/science-snippets/what-is-principal-component-analysis-pca-and-how-it-is-used-507186)
+
+When to use PCA: 
+-PCA technique is particularly useful in processing data where multi-colinearity exists between the features/variables.
+-PCA can be used when the dimensions of the input features are high (e.g. a lot of variables).
+-PCA can be also used for denoising and data compression.
+(https://towardsdatascience.com/pca-clearly-explained-how-when-why-to-use-it-and-feature-importance-a-guide-in-python-7c274582c37e)
+
+Qualities of datasets that make it good for PCA: 
+-PCA works with datasets with NUMERIC variables, it is very hard to do distance calculations and standardize/normalize mixed datasets or categorical variables. There are better methods for doing what PCA does for mixed/categorical datasets.
+-PCA works best on data set having 3 or higher dimensions. Because, with higher dimensions, it becomes increasingly difficult for us to make interpretations from the resultant cloud of data.
+(https://www.analyticsvidhya.com/blog/2016/03/pca-practical-guide-principal-component-analysis-python/)
+
+
 Generally PCA in R 
 
 The process of PCA can be broken down to 5 steps
@@ -358,7 +373,6 @@ get_pca_ind(wdbc.facoPCA) #get_pca_var(wdbc.facoPCA): Extract the results for in
 fviz_pca_ind(wdbc.facoPCA) #fviz_pca_var(wdbc.facoPCA): Visualize the results individuals and variables, respectively.
 fviz_pca_biplot(wdbc.facoPCA) #Make a biplot of individuals and variables.
 ```
-
-
+ 
 
 
