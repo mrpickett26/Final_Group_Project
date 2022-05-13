@@ -11,11 +11,12 @@ theme: lumen
 
 # Introduction
 
-Principal component analysis is a dimensionality-reduction method, that is used with multi-dimensional data sets, by transforming the variables into smaller components, without eliminating much of the data. Even though some of the accuracy may be compromised, PCA is great for simplifying very complicated and large data sets and exploring overall patterns as well as preparing the dataset for data visualization.
+Principal component analysis is a dimensionality-reduction method, that is used with multi-dimensional data sets, by transforming the variables into smaller components (principal components), without eliminating much of the data. Even though some of the accuracy may be compromised, PCA is great for simplifying very complicated and large data sets and exploring overall patterns as well as preparing the dataset for data visualization. "In PCA, principal components can be geometrically seen as the directions of high-dimensional data which capture the maximum amount of variance and project it onto a smaller dimensional subspace while keeping most of the information." (https://towardsdatascience.com/pca-eigenvectors-and-eigenvalues-1f968bc6777a)
+
 
 ## Why is PCA useful?
 
-The most important use of PCA is to represent a multivariate data table as smaller set of variables (summary indices) in order to observe trends, jumps, clusters and outliers. PCA is a very flexible tool and allows analysis of datasets that may contain, for example, multicollinearity, missing values, categorical data, and imprecise measurements. The goal of PCA is to extract the important information from the data and to express this information as a set of summary indices called principal components. (https://www.sartorius.com/en/knowledge/science-snippets/what-is-principal-component-analysis-pca-and-how-it-is-used-507186)
+The most important use of PCA is to represent a multivariate data table as smaller set of variables (summary indices) in order to observe trends, jumps, clusters and outliers. PCA is a very flexible tool and allows analysis of datasets that may contain, for example, multicollinearity, missing values, categorical data, and imprecise measurements. The goal of PCA is to extract the important information from the data and to express this information as a set of summary indices called principal components, and can be useful in training for machine learning and predictive modelling. (https://www.sartorius.com/en/knowledge/science-snippets/what-is-principal-component-analysis-pca-and-how-it-is-used-507186)
 
 ## When to use PCA
 
@@ -225,9 +226,9 @@ wdbc.pr <- prcomp(wdbc.data, scale = TRUE, center = TRUE)
 summary(wdbc.pr)
 
 ```
+The eigenvectors (principal components) determine the directions of the features in space, and the eigenvalues determine their magnitude. In other words, the eigenvalues explain the variance of the data along the new feature axes.
 
-
-## Step 4: Feture vector extraction
+## Step 4: Feature vector extraction
 
 We can now use these metrics to calculate the cumulative percentages. Cumulative percentage is another way of expressing frequency distribution. It calculates the percentage of the cumulative frequency within each interval, much as relative frequency distribution calculates the percentage of frequency. The main advantage of cumulative percentage over cumulative frequency as a measure of frequency distribution is that it provides an easier way to compare different sets of data. Cumulative percentage is calculated by dividing the cumulative frequency by the total number of observations (n), then multiplying it by 100 (the last value will always be equal to 100%).
 
@@ -340,8 +341,8 @@ wbg.pca<-prcomp(wbg, center=TRUE, scale =TRUE)
 
 wdbc.pca<-princomp(wdbc.data, center=TRUE, scale =TRUE)
 
-wbg.pca
-wdbc.pca
+summary(wbg.pca)
+summary(wdbc.pca)
 ```
 
 
@@ -376,7 +377,7 @@ wdbc_plot+labs(title = "PCA of yield contributing parameters")
 
 ```
 
-Another way to visualize PCA is by using the factoextra package
+#Another way to visualize PCA is by using the factoextra package
 
 The FactoMineR package can do PCA for you, and the factoextra package is useful in extracting components of the PCA analysis done by the FactoMineR package. Let's explore the functions from these packages with the WDBC dataset.
 
