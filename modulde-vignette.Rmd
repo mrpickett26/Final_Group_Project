@@ -149,7 +149,7 @@ We can create this covariance matrix by following these steps:
 
 ```{r wbg prcomp, echo=TRUE, warning=FALSE, message=FALSE}
 
-wbg.pcov <- prcomp(wbg, cor=FALSE, scores=TRUE) #error with infinite or missing values
+wbg.pcov <- prcomp(wbg, cor=FALSE, scores=TRUE) 
 summary(wbg.pcov) #Build the covariance matrix
 
 cex.before <- par("cex")
