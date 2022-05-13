@@ -17,17 +17,17 @@ Principal component analysis is a dimensionality-reduction method, that is used 
 
 The most important use of PCA is to represent a multivariate data table as smaller set of variables (summary indices) in order to observe trends, jumps, clusters and outliers. PCA is a very flexible tool and allows analysis of datasets that may contain, for example, multicollinearity, missing values, categorical data, and imprecise measurements. The goal of PCA is to extract the important information from the data and to express this information as a set of summary indices called principal components. (https://www.sartorius.com/en/knowledge/science-snippets/what-is-principal-component-analysis-pca-and-how-it-is-used-507186)
 
-### When to use PCA
+## When to use PCA
 
 - PCA technique is particularly useful in processing data where multi-colinearity exists between the features/variables.
 - PCA can be used when the dimensions of the input features are high (e.g. a lot of variables).
 - PCA can be also used for denoising and data compression.
 (https://towardsdatascience.com/pca-clearly-explained-how-when-why-to-use-it-and-feature-importance-a-guide-in-python-7c274582c37e)
 
-### Qualities of datasets that make it good for PCA
+## Qualities of datasets that make it good for PCA
 
 - PCA works with datasets with NUMERIC variables, it is very hard to do distance calculations and standardize/normalize mixed datasets or categorical variables. There are better methods for doing what PCA does for mixed/categorical datasets.
-- PCA works best on data set having 3 or higher dimensions. Because, with higher dimensions, it becomes increasingly difficult for us to make interpretations from the resultant cloud of data.
+- PCA works best on datasets that have 3 or higher dimensions. Because, with higher dimensions, it becomes increasingly difficult for us to make interpretations from the resultant cloud of data.
 (https://www.analyticsvidhya.com/blog/2016/03/pca-practical-guide-principal-component-analysis-python/)
 
 
@@ -95,6 +95,11 @@ Whenever working with different data types (e.g., different measurements, units,
 
 Statistically speaking this means z-scoring all the variables.
 
+```{r zscore image, echo=FALSE, out.width="##%"}
+knitr::include_graphics("images/Screenshot 2022-04-20 at 12.38.46 PM.png")
+
+```
+
 When working in R we can use the scale() function to standardize our variables, but for a refresher on normalization of data, we have included a documented scale function below. 
 
 ```{r scale, echo=TRUE, warning=FALSE, message=FALSE}
@@ -142,7 +147,7 @@ We can create this covariance matrix by following these steps:
 
 1) Spectral decomposition
 
-```{r wbg prcomp, echo=TRUE}
+```{r wbg prcomp, echo=TRUE, warning=FALSE, message=FALSE}
 
 wbg.pcov <- prcomp(wbg, cor=FALSE, scores=TRUE) #error with infinite or missing values
 summary(wbg.pcov) #Build the covariance matrix
@@ -155,7 +160,7 @@ biplot(wbg.pcov) #Create a biplot of the covariance
 
 2) Singular value decomposition
 
-```{r wdbc princomp, echo=TRUE}
+```{r wdbc princomp, echo=TRUE, warning=FALSE, message=FALSE}
 wdbc.pcov <- princomp(wdbc.data, scores = TRUE)
 summary(wdbc.pcov) #Build the covariance matrix
 
@@ -167,7 +172,7 @@ biplot(wdbc.pcov) #Create a biplot of the covariance
 
 When working in R, we can also use the cov() function to create the covariate matrix
 
-```{r covariance, echo=TRUE}
+```{r covariance, echo=TRUE, warning=FALSE, message=FALSE}
 
 cov(wbg)
 
@@ -190,7 +195,7 @@ knitr::include_graphics("images/eigen.png")
 
 After creating the biplots in the previous step, we can see that area_worst and area_mean have much larger covariances than the other variables included. This is due to a scale issue and therefore indicates to us that we need to scale those variables for future PCA analysis. Let's calculate the eigenvectors and eigenvalues in the following steps.
 
-```{r eigen by hand, echo=TRUE}
+```{r eigen by hand, echo=TRUE, warning=FALSE, message=FALSE}
 par(cex = cex.before)
 par(mfrow = c(1, 2)) #Set up a grid for PCA analysis
 pr.cvar <- wbg.pcov$sdev ^ 2 #Calculate variability of each variable
@@ -230,7 +235,7 @@ It is useful in PCA to create a scree plot of covariance and cumulative proporti
 
 We can begin this step by looking at the German dataset. 
 
-```{r feature extract German dataset, echo=TRUE}
+```{r feature extract German dataset, echo=TRUE, warning=FALSE, message=FALSE}
 
 round(cumsum(pve_cov_wbg), 2) #Cumulative percentage
 
@@ -248,7 +253,7 @@ plot(cumsum(pve_cov_wbg), xlab = "Principal Component",
 
 Now the Wisconsin dataset. 
 
-```{r feature extract Wisconsin dataset, echo=TRUE}
+```{r feature extract Wisconsin dataset, echo=TRUE, warning=FALSE, message=FALSE}
 round(cumsum(pve_cov), 2) #Cumulative percentage
 
 # Plot variance explained for each principal component
@@ -270,7 +275,7 @@ In the scree plots the first two or three PCs have capture most of the informati
 
 By using the selected feature vector we can finally reorient the WBC data using the axes from the principal components.
 
-```{r recast extract, echo=TRUE}
+```{r recast extract, echo=TRUE, warning=FALSE, message=FALSE}
 
 # Set up 1 x 2 plotting grid
 par(mfrow = c(1, 2))
@@ -308,7 +313,7 @@ A majority of the variation is explained by the first six PC’s and the eigen v
 
 Another way to determine the number of factors to use in PCA is through the preprocess() function in the caret package. This by default keeps the components that explain 95% of the variance but can be changed using the thresh or pcaComp parameter. 
 
-```{r caret package extract, echo=TRUE}
+```{r caret package extract, echo=TRUE, warning=FALSE, message=FALSE}
 preProc <- preProcess(wbg,method="pca",thresh = 0.95) #Can substitutr in thresh with PCAcomp to change number of components you want to account for 
 predictPC <- predict(preProc, wbg)
 plot(predictPC[,3],predictPC[,4],col=blues9)
@@ -319,7 +324,7 @@ This result can also be represented by the graph above where most of the points 
 
 Sub in different variables:
 
-```{r caret package extract num2, echo=TRUE}
+```{r caret package extract num2, echo=TRUE, warning=FALSE, message=FALSE}
 preProc2 <- preProcess(wbg,method="pca",thresh = 0.95) #Can substitutr in thresh with PCAcomp to change number of components you want to account for 
 predictPC2 <- predict(preProc2, wbg)
 plot(predictPC2[,4],predictPC2[,7],col=blues9)
@@ -330,7 +335,7 @@ plot(predictPC2[,4],predictPC2[,7],col=blues9)
 
 When working in R, we can skip a lot of these steps by running the prcomp() function and setting the arguments center and scale to be true. Then the summary() will give us the best model(s).
 
-```{r PCA extract, echo=TRUE}
+```{r PCA extract, echo=TRUE, warning=FALSE, message=FALSE}
 wbg.pca<-prcomp(wbg, center=TRUE, scale =TRUE)
 
 wdbc.pca<-princomp(wdbc.data, center=TRUE, scale =TRUE)
